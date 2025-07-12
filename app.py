@@ -1,48 +1,35 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-import time
 
-# Configuração da página
-st.set_page_config(page_title="HighFlyer PRO", layout="wide")
+st.set_page_config(page_title="HighFlyer Estratégico", layout="centered")
 
-# Sidebar - Controles
-st.sidebar.title("⚙️ Configurações")
-estrategia = st.sidebar.selectbox("Escolha a estratégia", ["Odds", "Alertas de Velas", "IA Preditiva"])
-tempo = st.sidebar.slider("Tempo da vela (segundos)", 5, 60, 15)
-entrada = st.sidebar.number_input("Valor da entrada", value=10.0)
+st.title("🎯 HighFlyer Estratégico - Previsão Manual com Entrada Real")
 
-# Título
-st.title("🚀 Painel HighFlyer - Controle de Operações")
+st.write("Cole abaixo os últimos multiplicadores (ex: `1.22, 1.45, 5.02, 10.12`)")
 
-# Simulação de gráfico
-st.subheader("📈 Gráfico de Análise")
-dados = pd.DataFrame({
-    'tempo': range(10),
-    'valor': np.random.normal(1, 0.2, 10).cumsum()
-})
-st.line_chart(dados.set_index('tempo'))
+entrada = st.text_area("📝 Últimos resultados", placeholder="Cole aqui os últimos multiplicadores...")
 
-# Alertas com base na estratégia
-if estrategia == "Odds":
-    st.success("✅ Odds favoráveis detectadas.")
-elif estrategia == "Alertas de Velas":
-    st.warning("⚠️ Vela fora do padrão!")
-else:
-    st.info("🤖 IA: Recomendação de entrada detectada.")
+if entrada:
+    try:
+        # Processar os dados
+        velas = [float(x.strip()) for x in entrada.split(",")]
+        ultimas_5 = velas[-5:]
+        media = sum(ultimas_5) / len(ultimas_5)
+        ult_alta = max(velas)
+        abaixo_2x = sum(1 for v in velas[-10:] if v < 2.0)
 
-# Botão de simulação
-if st.button("Executar operação"):
-    st.balloons()
-    st.write(f"💰 Entrada simulada de R${entrada} com estratégia **{estrategia}**.")
-    st.write("⏳ Aguardando resultado...")
+        st.subheader("📊 Análise do Ciclo Atual")
+        st.write(f"Média das últimas 5 velas: **{media:.2f}**")
+        st.write(f"Última vela mais alta: **{ult_alta:.2f}x**")
+        st.write(f"Velas abaixo de 2x nas últimas 10: **{abaixo_2x}**")
 
-# Histórico (simulado)
-st.subheader("📜 Histórico de operações")
-historico = pd.DataFrame({
-    "Horário": [time.strftime("%H:%M:%S")],
-    "Estratégia": [estrategia],
-    "Entrada (R$)": [entrada],
-    "Resultado": ["Aguardando..."]
-})
-st.table(historico)
+        if abaixo_2x >= 7:
+            st.success("🚀 Forte chance de explosão em breve!")
+            st.balloons()
+        elif media >= 2:
+            st.info("📈 Média boa! Possível entrada segura.")
+        else:
+            st.warning("⚠️ Ciclo fraco. Melhor aguardar.")
+
+    except:
+        st.error("❌ Erro: Verifique se você digitou os números corretamente.")
