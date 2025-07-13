@@ -1,48 +1,50 @@
 import streamlit as st
+import time
 
-# Configurações iniciais
-st.set_page_config(
-    page_title="Analisador de Velas",
-    page_icon="📊",
-    layout="centered"
-)
+# Configuração da página
+st.set_page_config(page_title="Analisador de Velas", layout="centered")
 
-# Título e instrução
-st.title("📊 Analisador de Velas")
-st.markdown("⚡ *Digite os valores das últimas 6 velas assim que elas fecharem. O sistema vai analisar automaticamente!*")
+# Barra lateral de instrução
+with st.sidebar:
+    st.title("📊 Instruções")
+    st.markdown("""
+    - Digite os valores das **6 últimas velas** o mais rápido possível.
+    - O sistema vai calcular o **resultado automaticamente**.
+    - Ideal para quem opera com **tempo de 5 segundos entre velas**.
+    """)
+
+st.markdown("<h2 style='text-align: center;'>⚡ Analisador de Velas Rápido</h2>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Preencha os valores e o resultado será mostrado automaticamente.</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Layout em colunas
-col1, col2 = st.columns(2)
+# Função de análise
+def analisar_velas(valores):
+    media = sum(valores) / len(valores)
+    if valores[-1] > media:
+        return "verde", "🔥 Alta probabilidade de vela VERDE!"
+    elif valores[-1] < media:
+        return "vermelha", "🔻 Alta probabilidade de vela VERMELHA!"
+    else:
+        return "neutra", "⚠️ Vela neutra ou indefinida."
 
-with col1:
-    v1 = st.number_input("1ª vela", step=0.01, format="%.2f")
-    v2 = st.number_input("2ª vela", step=0.01, format="%.2f")
-    v3 = st.number_input("3ª vela", step=0.01, format="%.2f")
+# Captura dos valores
+valores = []
+for i in range(1, 7):
+    valor = st.number_input(f"{i}ª vela", min_value=0.0, step=0.01, format="%.2f", key=f"vela_{i}")
+    valores.append(valor)
 
-with col2:
-    v4 = st.number_input("4ª vela", step=0.01, format="%.2f")
-    v5 = st.number_input("5ª vela", step=0.01, format="%.2f")
-    v6 = st.number_input("6ª vela", step=0.01, format="%.2f")
+# Mostrar resultado apenas se todos forem preenchidos (> 0)
+if all(v > 0 for v in valores):
+    cor, resultado = analisar_velas(valores)
 
-# Lógica simples de exemplo
-velas = [v1, v2, v3, v4, v5, v6]
-media = sum(velas) / 6
-
-st.markdown("---")
-st.subheader("🔍 Resultado da Análise")
-
-# Exemplo de lógica: se a média das velas for maior que 1.5, probabilidade de vela verde
-if media > 1.5:
-    st.success("🔥 Alta probabilidade de **vela verde**!")
-elif media < 1.0:
-    st.error("🔻 Alta probabilidade de **vela vermelha**!")
+    # Cor de fundo dinâmica
+    if cor == "verde":
+        st.success(resultado)
+        st.markdown("<audio autoplay><source src='https://actions.google.com/sounds/v1/alarms/beep_short.ogg' type='audio/ogg'></audio>", unsafe_allow_html=True)
+    elif cor == "vermelha":
+        st.error(resultado)
+        st.markdown("<audio autoplay><source src='https://actions.google.com/sounds/v1/alarms/beep_short.ogg' type='audio/ogg'></audio>", unsafe_allow_html=True)
+    else:
+        st.info(resultado)
 else:
-    st.warning("⚠️ Possível **vela de indecisão** (Doji)")
-
-# Explicação adicional
-st.markdown("✅ Essa previsão é baseada na média dos valores inseridos. Quanto mais precisos os dados, melhor o resultado.")
-
-# Rodapé
-st.markdown("---")
-st.caption("Desenvolvido por Ariclenes com Streamlit 🚀")
+    st.info("Preencha todos os valores acima.")
