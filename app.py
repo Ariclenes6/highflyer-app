@@ -1,44 +1,48 @@
 import streamlit as st
 
-st.set_page_config(page_title="🚀 HighFlyer - Previsão", layout="centered")
+# Configurações iniciais
+st.set_page_config(
+    page_title="Analisador de Velas",
+    page_icon="📊",
+    layout="centered"
+)
 
-st.title("🚀 HighFlyer - Previsão em Tempo Real")
-st.markdown("⚡ Digite as velas assim que elas fecharem. O sistema analisa automaticamente!")
+# Título e instrução
+st.title("📊 Analisador de Velas")
+st.markdown("⚡ *Digite os valores das últimas 6 velas assim que elas fecharem. O sistema vai analisar automaticamente!*")
+st.markdown("---")
 
-# Layout em 2 linhas com 3 colunas cada
-col1, col2, col3 = st.columns(3)
-col4, col5, col6 = st.columns(3)
+# Layout em colunas
+col1, col2 = st.columns(2)
 
-# Inputs separados e rápidos
-vela1 = col1.number_input("1ª vela", step=0.01, format="%.2f", key="v1")
-vela2 = col2.number_input("2ª vela", step=0.01, format="%.2f", key="v2")
-vela3 = col3.number_input("3ª vela", step=0.01, format="%.2f", key="v3")
-vela4 = col4.number_input("4ª vela", step=0.01, format="%.2f", key="v4")
-vela5 = col5.number_input("5ª vela", step=0.01, format="%.2f", key="v5")
-vela6 = col6.number_input("6ª vela", step=0.01, format="%.2f", key="v6")
+with col1:
+    v1 = st.number_input("1ª vela", step=0.01, format="%.2f")
+    v2 = st.number_input("2ª vela", step=0.01, format="%.2f")
+    v3 = st.number_input("3ª vela", step=0.01, format="%.2f")
 
-valores = [vela1, vela2, vela3, vela4, vela5, vela6]
+with col2:
+    v4 = st.number_input("4ª vela", step=0.01, format="%.2f")
+    v5 = st.number_input("5ª vela", step=0.01, format="%.2f")
+    v6 = st.number_input("6ª vela", step=0.01, format="%.2f")
 
-def analisar_velas(valores):
-    if any(v == 0.0 for v in valores):
-        return "⏳ Aguardando todos os valores..."
+# Lógica simples de exemplo
+velas = [v1, v2, v3, v4, v5, v6]
+media = sum(velas) / 6
 
-    ult_5 = valores[-5:]
-    ult_6 = valores[-6:]
+st.markdown("---")
+st.subheader("🔍 Resultado da Análise")
 
-    media_5 = sum(ult_5) / 5
-    abaixo_2 = sum(1 for x in ult_6 if x < 2.0)
-    frias = sum(1 for x in ult_6 if x < media_5 * 0.95)
-    sem_repeticao = all(ult_6.count(x) == 1 for x in ult_6)
+# Exemplo de lógica: se a média das velas for maior que 1.5, probabilidade de vela verde
+if media > 1.5:
+    st.success("🔥 Alta probabilidade de **vela verde**!")
+elif media < 1.0:
+    st.error("🔻 Alta probabilidade de **vela vermelha**!")
+else:
+    st.warning("⚠️ Possível **vela de indecisão** (Doji)")
 
-    if abaixo_2 >= 3:
-        return "🔥 Alta probabilidade de vela verde!"
-    elif frias >= 3:
-        return "⚠️ Pode vir uma vela verde forte!"
-    elif sem_repeticao:
-        return "🔄 Padrão sem repetição — possível reversão!"
-    else:
-        return "📉 Sem padrão forte detectado."
+# Explicação adicional
+st.markdown("✅ Essa previsão é baseada na média dos valores inseridos. Quanto mais precisos os dados, melhor o resultado.")
 
-resultado = analisar_velas(valores)
-st.markdown(f"### Resultado: {resultado}")
+# Rodapé
+st.markdown("---")
+st.caption("Desenvolvido por Ariclenes com Streamlit 🚀")
