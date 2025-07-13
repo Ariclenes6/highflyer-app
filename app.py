@@ -2,13 +2,27 @@ import streamlit as st
 
 st.set_page_config(page_title="🚀 HighFlyer - Previsão", layout="centered")
 
-st.title("🚀 HighFlyer - Previsão Inteligente")
-st.write("Digite os **últimos 6 valores das velas** para prever o próximo movimento.")
-st.write("Exemplo: `1.23, 1.01, 2.04, 1.99, 1.55, 1.32`")
+st.title("🚀 HighFlyer - Previsão em Tempo Real")
+st.markdown("⚡ Digite as velas assim que elas fecharem. O sistema analisa automaticamente!")
 
-entrada = st.text_area("Resultados (separados por vírgula)", height=100)
+# Layout em 2 linhas com 3 colunas cada
+col1, col2, col3 = st.columns(3)
+col4, col5, col6 = st.columns(3)
+
+# Inputs separados e rápidos
+vela1 = col1.number_input("1ª vela", step=0.01, format="%.2f", key="v1")
+vela2 = col2.number_input("2ª vela", step=0.01, format="%.2f", key="v2")
+vela3 = col3.number_input("3ª vela", step=0.01, format="%.2f", key="v3")
+vela4 = col4.number_input("4ª vela", step=0.01, format="%.2f", key="v4")
+vela5 = col5.number_input("5ª vela", step=0.01, format="%.2f", key="v5")
+vela6 = col6.number_input("6ª vela", step=0.01, format="%.2f", key="v6")
+
+valores = [vela1, vela2, vela3, vela4, vela5, vela6]
 
 def analisar_velas(valores):
+    if any(v == 0.0 for v in valores):
+        return "⏳ Aguardando todos os valores..."
+
     ult_5 = valores[-5:]
     ult_6 = valores[-6:]
 
@@ -26,13 +40,5 @@ def analisar_velas(valores):
     else:
         return "📉 Sem padrão forte detectado."
 
-if entrada:
-    try:
-        lista_valores = [float(x.strip()) for x in entrada.split(",") if x.strip()]
-        if len(lista_valores) < 6:
-            st.warning("Por favor, insira pelo menos 6 valores.")
-        else:
-            resultado = analisar_velas(lista_valores)
-            st.success(f"🔍 Resultado da análise: {resultado}")
-    except ValueError:
-        st.error("Erro: Certifique-se de que os valores são números separados por vírgula.")
+resultado = analisar_velas(valores)
+st.markdown(f"### Resultado: {resultado}")
