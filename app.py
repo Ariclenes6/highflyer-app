@@ -1,44 +1,45 @@
 import streamlit as st
 
-st.set_page_config(page_title="Analisador de Velas", page_icon="🔥", layout="centered")
-st.markdown("""
-    <style>
-    input[type="number"] {
-        text-align: center;
-    }
-    </style>
-""", unsafe_allow_html=True)
+st.set_page_config(page_title="HighFlyer Predictor", layout="centered")
 
-st.markdown("""
-# 🔥 Analisador de Velas Rápido
-Digite os valores das velas rapidamente. O resultado será exibido automaticamente após a 6ª vela.
-""")
+st.title("🛩️ HighFlyer - Previsão de Vela")
+st.markdown("Clique nos botões abaixo para registrar se a vela foi alta ou baixa (total de 6).")
 
-valores = []
-resultado = ""
+# Lista de velas registradas
+if "velas" not in st.session_state:
+    st.session_state.velas = []
 
-def analisar(velas):
-    media = sum(velas) / len(velas)
-    ultima = velas[-1]
-    if ultima > media:
-        return "🔥 Alta probabilidade de vela **verde**!"
+# Botões
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("📈 Vela Alta"):
+        if len(st.session_state.velas) < 6:
+            st.session_state.velas.append("alta")
+with col2:
+    if st.button("📉 Vela Baixa"):
+        if len(st.session_state.velas) < 6:
+            st.session_state.velas.append("baixa")
+
+# Mostrar velas registradas
+st.markdown(f"**Velas registradas:** {st.session_state.velas}")
+
+# Prever próxima vela (lógica simples)
+if len(st.session_state.velas) == 6:
+    alta = st.session_state.velas.count("alta")
+    baixa = st.session_state.velas.count("baixa")
+
+    if alta > baixa:
+        previsao = "📈 Provável Vela Alta"
+        cor = "green"
+    elif baixa > alta:
+        previsao = "📉 Provável Vela Baixa"
+        cor = "red"
     else:
-        return "🔴 Alta probabilidade de vela **vermelha**!"
+        previsao = "⚖️ Tendência neutra"
+        cor = "gray"
 
-cols = st.columns(6)
-for i in range(6):
-    with cols[i]:
-        valor = st.number_input(f"{i+1}ª vela", key=f"vela_{i}", step=0.01, format="%.2f")
-        valores.append(valor)
+    st.markdown(f"<h2 style='color:{cor}; text-align:center'>{previsao}</h2>", unsafe_allow_html=True)
 
-# Só mostra resultado quando todas estão preenchidas
-if all(v > 0 for v in valores):
-    resultado = analisar(valores)
-    st.markdown(f"### Resultado: {resultado}")
-else:
-    st.markdown("<small>Preencha todos os valores para ver o resultado.</small>", unsafe_allow_html=True)
-
-st.markdown("""
-<hr>
-<small>⏱ Otimizado para digitação rápida durante jogos como FlaBet.</small>
-""")
+# Botão para limpar
+if st.button("🔄 Nova Rodada"):
+    st.session_state.velas = []
