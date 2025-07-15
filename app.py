@@ -1,4 +1,4 @@
-  import streamlit as st
+import streamlit as st
 from datetime import datetime
 
 st.set_page_config(page_title="HighFlyer - Previsão de Vela", page_icon="✈️")
@@ -32,3 +32,4 @@ if len(st.session_state.velas) == 6:
 
 if st.button("🔁 Nova Rodada"):
     st.session_state.velas = []
+  
