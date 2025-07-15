@@ -1,92 +1,60 @@
-import streamlit as st
+  import streamlit as st
+from datetime import datetime
 
-st.set_page_config(page_title="HighFlyer Predictor", layout="centered")
-
-# Estilização com CSS
-st.markdown("""
-    <style>
-    .main {
-        background-color: #0f1117;
-        color: white;
-    }
-    .big-title {
-        font-size: 36px;
-        font-weight: bold;
-        text-align: center;
-        margin-top: 20px;
-    }
-    .btn {
-        display: inline-block;
-        width: 100%;
-        padding: 12px;
-        font-size: 18px;
-        font-weight: bold;
-        border-radius: 8px;
-        border: 2px solid #fff;
-        margin-bottom: 10px;
-    }
-    .btn-alta {
-        background-color: #0f0f0f;
-        color: #00ff99;
-        border-color: #00ff99;
-    }
-    .btn-baixa {
-        background-color: #0f0f0f;
-        color: #ff4444;
-        border-color: #ff4444;
-    }
-    .previsao {
-        text-align: center;
-        font-size: 28px;
-        font-weight: bold;
-        margin-top: 30px;
-    }
-    .btn-reset {
-        margin-top: 30px;
-        background-color: #333;
-        color: white;
-        border-radius: 8px;
-        padding: 10px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# Título
-st.markdown("<div class='big-title'>🛩️ HighFlyer<br>Previsão de Vela</div>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center'>Clique nos botões para registrar se a vela foi alta ou baixa</p>", unsafe_allow_html=True)
-
-# Velas
-if "velas" not in st.session_state:
+# Inicializar estado se não existir
+if 'velas' not in st.session_state:
     st.session_state.velas = []
+if 'resultados' not in st.session_state:
+    st.session_state.resultados = []
 
-# Botões estilizados
+st.set_page_config(page_title="HighFlyer PRO", page_icon="🚁", layout="centered")
+
+st.title(" 🚁 HighFlyer PRO - Previsão Inteligente de Vela")
+st.subheader("Clique nos botões abaixo para registrar se a vela foi alta ou baixa (total de 6).")
+
 col1, col2 = st.columns(2)
+
 with col1:
-    if st.button("📈 Vela Alta", key="alta"):
-        if len(st.session_state.velas) < 6:
-            st.session_state.velas.append("alta")
+    if st.button(" 📈 Vela Alta", use_container_width=True):
+        st.session_state.velas.append('alta')
+
 with col2:
-    if st.button("📉 Vela Baixa", key="baixa"):
-        if len(st.session_state.velas) < 6:
-            st.session_state.velas.append("baixa")
+    if st.button(" 📉 Vela Baixa", use_container_width=True):
+        st.session_state.velas.append('baixa')
 
-# Mostrar velas
-st.markdown(f"<p style='text-align:center'><strong>Velas registradas:</strong> {st.session_state.velas}</p>", unsafe_allow_html=True)
+st.markdown("**Velas registradas:** " + str(st.session_state.velas))
 
-# Previsão
-if len(st.session_state.velas) == 6:
-    alta = st.session_state.velas.count("alta")
-    baixa = st.session_state.velas.count("baixa")
-
-    if alta > baixa:
-        previsao = "<span style='color:#00ff99'>📈 Provável Vela Alta</span>"
-    elif baixa > alta:
-        previsao = "<span style='color:#ff4444'>📉 Provável Vela Baixa</span>"
+# Função de previsão (simples, baseada em contagem)
+def prever_vela(velas):
+    if len(velas) < 6:
+        return "Aguardando mais dados...", "⚪", "Padrão insuficiente"
+    altas = velas.count('alta')
+    baixas = velas.count('baixa')
+    if altas > baixas:
+        return "Provável Vela Alta", "📈", "Confiança Alta"
+    elif baixas > altas:
+        return "Provável Vela Baixa", "📉", "Confiança Alta"
     else:
-        previsao = "<span style='color:gray'>⚖️ Tendência Neutra</span>"
+        return "Padrão Equilibrado", "⚖️", "Confiança Média"
 
-    st.markdown(f"<div class='previsao'>{previsao}</div>", unsafe_allow_html=True)
+# Prever
+if len(st.session_state.velas) == 6:
+    previsao, icone, confianca = prever_vela(st.session_state.velas)
+    st.markdown(f"### {icone} {previsao}")
+    st.markdown(f"**{confianca}**")
+    st.session_state.resultados.append({
+        'velas': st.session_state.velas.copy(),
+        'previsao': previsao,
+        'hora': datetime.now().strftime("%H:%M:%S")
+    })
 
-# Botão de reset
-if st.button("🔁 Nova Rodada"):
+# Histórico de previsões
+if st.session_state.resultados:
+    st.subheader("Histórico de Rodadas")
+    for r in reversed(st.session_state.resultados[-10:]):
+        st.markdown(f"{r['hora']} - {r['velas']} ➔ **{r['previsao']}**")
+
+# Resetar rodada
+if st.button("🔁 Nova Rodada", type="primary"):
     st.session_state.velas = []
+      
